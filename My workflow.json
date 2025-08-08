@@ -1,0 +1,287 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5000/predict",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{$json[\"title\"]}}\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "0a21eb24-d87f-4871-b406-fbc1e0e831dc",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fce94303-6d20-4133-853f-ed4e6b2f1177",
+              "name": "prediction",
+              "value": "=prediction :{{ $json.prediction }}\n\nnews : {{ $('Get row(s) in sheet').item.json.title }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1456,
+        0
+      ],
+      "id": "794b512a-8173-4797-a5ff-645329df66b1",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sendTo": "f221478@komar.edu.iq",
+        "subject": "news detection",
+        "message": "={{ $json.prediction }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1664,
+        0
+      ],
+      "id": "b07f6742-5631-4813-8fac-6ae7ad757867",
+      "name": "Send a message",
+      "webhookId": "e825c440-facd-4ee1-baf0-b27728ab91fe",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TwwmoPY8JCp264zi",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "14_nQ_l-7e60mMkLLQejWRyZyS0V6JwDI-zzUpDDnSEg",
+          "mode": "list",
+          "cachedResultName": "Untitled spreadsheet",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14_nQ_l-7e60mMkLLQejWRyZyS0V6JwDI-zzUpDDnSEg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 517451483,
+          "mode": "list",
+          "cachedResultName": "Book1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14_nQ_l-7e60mMkLLQejWRyZyS0V6JwDI-zzUpDDnSEg/edit#gid=517451483"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        416,
+        0
+      ],
+      "id": "41103a84-59cb-4054-ada1-abf305753d76",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "C4RpixRet5nl2u0y",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 21
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "3cd931bc-61e2-4f9c-8487-f27dc6085898",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "batchSize": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "07784d36-efda-4e6c-96af-e9ec3248ac81",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "5c92c17d-acaa-478b-bdae-cf9c01b010d2"
+    },
+    {
+      "parameters": {
+        "maxItems": 3
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        832,
+        0
+      ],
+      "id": "ed639ca8-a993-4748-b0b4-4ef13fb44851",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all input items\nconst allItems = $input.all();\n\n// Shuffle them randomly\nconst shuffled = allItems.sort(() => Math.random() - 0.5);\n\n// Return the shuffled list\nreturn shuffled;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "ab6ec560-e856-453b-804d-0c375f8decec",
+      "name": "Code"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f719a4fc-3c78-4928-a5a2-4c45d0ba274d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0cf4b1eac6d8fe21f57a8bf323a7cac240fc6eda60cbaa1f34da627f621a1720"
+  },
+  "id": "WPFWtoa4fcoSrSyH",
+  "tags": []
+}
